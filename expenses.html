@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Expense Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url('https://img.freepik.com/free-vector/flat-design-finance-background_23-2149054524.jpg?w=740&t=st=1693234652~exp=1693235252~hmac=b00c9c1cfb2c90c1d9ffb0b1c7deef8e287ba2b2d4b0f9262f91147d3f65d7bc') no-repeat center center fixed;
+    background-size: cover;
+  }
+
+  header {
+    background: linear-gradient(90deg, #4facfe, #00c6ff);
+    color: white;
+    padding: 15px 20px;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+  header button {
+    background: white;
+    color: #4facfe;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  header button:hover {
+    background: #eaf6ff;
+  }
+
+  section {
+    display: none;
+    padding: 30px;
+    text-align: center;
+  }
+  .active { display: block; }
+
+  .card {
+    background: rgba(255,255,255,0.95);
+    padding: 30px;
+    margin: 40px auto;
+    max-width: 450px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+
+  input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  button {
+    background: linear-gradient(90deg, #4facfe, #00c6ff);
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+  }
+  button:hover {
+    background: linear-gradient(90deg, #00c6ff, #4facfe);
+  }
+
+  ul {
+    text-align: left;
+    padding: 0;
+    list-style: none;
+  }
+  ul li {
+    background: #f1f1f1;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .total-box {
+    margin: 15px 0;
+    padding: 12px;
+    background: #eaf6ff;
+    border-radius: 12px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .welcome-msg {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  table, th, td {
+    border: 1px solid #ccc;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: center;
+  }
+
+  th {
+    background: #4facfe;
+    color: white;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  🎓 Student Expense Tracker
+  <button onclick="showSection('profile')">👤 Profile</button>
+</header>
+
+<!-- Login Page -->
+<section id="login" class="active">
+  <div class="card">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Enter Username">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="login()">Login</button>
+    <button onclick="resetExpenses()" style="margin-top:8px; background:#ff4d4d;">Reset All Data</button>
+  </div>
+</section>
+
+<!-- Expense Page -->
+<section id="expense">
+  <div class="card">
+    <div class="welcome-msg">Welcome, <span id="loggedUser"></span>!</div>
+    <h2>Enter Your Daily Expenses</h2>
+    <select id="category">
+      <option value="Entertainment">Entertainment</option>
+      <option value="Study">Study</option>
+      <option value="Gym">Gym</option>
+      <option value="Food">Food</option>
+      <option value="Travel">Travel</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="number" id="amount" placeholder="Enter Amount (₹)">
+    <button onclick="saveExpense()">Save Expense</button>
+    <button onclick="showAnalysis()">View Analysis</button>
+  </div>
+</section>
+
+<!-- Analysis Page -->
+<section id="analysis">
+  <div class="card">
+    <h2>📊 Expense Analysis</h2>
+    <canvas id="expenseChart" width="300" height="300"></canvas>
+
+    <div class="total-box" id="totalBox">Total Expenses: ₹0</div>
+
+    <h3>📌 Breakdown Table</h3>
+    <table id="expenseTable">
+      <tr>
+        <th>Category</th>
+        <th>Amount (₹)</th>
+      </tr>
+    </table>
+
+    <button onclick="backToExpense()">➕ Add More Expenses</button>
+    <button onclick="resetExpenses()">♻️ Reset All Expenses</button>
+  </div>
+</section>
+
+<!-- Profile Page -->
+<section id="profile">
+  <div class="card">
+    <h2>👤 My Profile</h2>
+    <p><b>Name:</b> <span id="profileName">Not Set</span></p>
+    <p><b>Email:</b> <span id="profileEmail">Not Set</span></p>
+    
+    <h3>✏️ Edit Profile</h3>
+    <input type="text" id="editName" placeholder="Enter Name">
+    <input type="email" id="editEmail" placeholder="Enter Email">
+    <button onclick="saveProfile()">Save Profile</button>
+    <button onclick="showSection('expense')">⬅ Back to Expenses</button>
+  </div>
+</section>
+
+<script>
+let expenses = {};
+let userProfile = {name:"", email:""};
+
+function showSection(id){
+  document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function login(){
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
+  if(user && pass){
+    alert("Login Successful ✅");
+    userProfile.name = user;
+    document.getElementById("profileName").innerText = user;
+    document.getElementById("loggedUser").innerText = user;
+    showSection("expense");
+  } else{
+    alert("Please enter username and password ❌");
+  }
+}
+
+function saveExpense(){
+  let category = document.getElementById("category").value;
+  let amount = parseInt(document.getElementById("amount").value);
+
+  if(!amount || amount <=0){
+    alert("Enter valid amount!");
+    return;
+  }
+
+  if(expenses[category]){
+    expenses[category] += amount;
+  } else{
+    expenses[category] = amount;
+  }
+
+  alert("Expense Saved ✅");
+  document.getElementById("amount").value="";
+}
+
+function showAnalysis(){
+  showSection("analysis");
+
+  // Chart
+  let ctx = document.getElementById("expenseChart").getContext("2d");
+  new Chart(ctx,{
+    type:"pie",
+    data:{
+      labels:Object.keys(expenses),
+      datasets:[{
+        data:Object.values(expenses),
+        backgroundColor:["#4facfe","#00c6ff","#36a2eb","#ff6384","#ffcd56","#8e44ad"]
+      }]
+    }
+  });
+
+  // Total
+  let total = Object.values(expenses).reduce((a,b)=>a+b,0);
+  document.getElementById("totalBox").innerText = "Total Expenses: ₹"+total;
+
+  // Table
+  let table = document.getElementById("expenseTable");
+  table.innerHTML = `<tr><th>Category</th><th>Amount (₹)</th></tr>`;
+  for(let cat in expenses){
+    let row = table.insertRow();
+    row.insertCell(0).innerText = cat;
+    row.insertCell(1).innerText = expenses[cat];
+  }
+}
+
+function backToExpense(){ showSection("expense"); }
+
+function resetExpenses(){
+  if(confirm("Are you sure you want to reset all expenses?")){
+    expenses={};
+    alert("All expenses cleared ✅");
+    showSection("login");
+    document.getElementById("username").value="";
+    document.getElementById("password").value="";
+    document.getElementById("loggedUser").innerText="";
+  }
+}
+
+function saveProfile(){
+  let name = document.getElementById("editName").value;
+  let email = document.getElementById("editEmail").value;
+  if(name){
+    userProfile.name=name;
+    document.getElementById("profileName").innerText=name;
+  }
+  if(email){
+    userProfile.email=email;
+    document.getElementById("profileEmail").innerText=email;
+  }
+  alert("Profile Updated ✅");
+  document.getElementById("editName").value="";
+  document.getElementById("editEmail").value="";
+}
+</script>
+</body>
+</html>
