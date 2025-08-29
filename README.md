@@ -2,7 +2,7 @@
 
 
 ## Description
-A web app to help students track daily, weekly, and monthly expenses. Users can login, add expenses, and see charts for spending analysis and download their Record.
+A web app to help students track daily, weekly, and monthly expenses. Users can login, add expenses, and see charts for spending analysis .
 
 ## Features
 - Login with username/password
